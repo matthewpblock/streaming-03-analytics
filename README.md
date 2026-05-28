@@ -199,7 +199,7 @@ uvx pre-commit run --all-files
 
 # run the producer
 clear
-uv run python -m streaming.kafka_producer_case
+uv run python src/streaming/kafka_producer_case.py
 
 # do chores
 uv run ruff format .
@@ -223,7 +223,7 @@ Clear the terminal, then start the consumer.
 
 ```shell
 clear
-uv run python -m streaming.kafka_consumer_case
+uv run python src/streaming/kafka_consumer_case.py
 ```
 
 To start fresh, see
