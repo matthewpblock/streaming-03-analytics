@@ -131,6 +131,8 @@ ALLOWED_CURRENCY_CODES: Final[set[str]] = {"USD", "CAD", "MXN"}
 
 CONSUMED_FIELDNAMES: Final[list[str]] = [
     *SALES_REQUIRED_FIELDS,
+    "product_name",
+    "currency_name",
     "subtotal",
     "tax_amount",
     "total",

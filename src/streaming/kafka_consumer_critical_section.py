@@ -219,11 +219,14 @@ def initialize_output() -> RunningStats:
     return RunningStats()
 
 
-def load_reference_data() -> dict[str, float]:
+def load_reference_data() -> tuple[dict[str, float], dict[str, str], dict[str, str]]:
     """Load reference data used for message enrichment.
 
     Returns:
-        A dictionary mapping region_id to tax rate as a float.
+        A tuple containing:
+        - A dictionary mapping region_id to tax rate as a float.
+        - A dictionary mapping product_id to product_name as a string.
+        - A dictionary mapping currency_code to currency_name as a string.
     """
     LOG.info("Loading enrichment reference data...")
     region_lookup: dict[str, float] = {
@@ -235,13 +238,36 @@ def load_reference_data() -> dict[str, float]:
         ).items()
     }
     LOG.info(f"Found {len(region_lookup)} region tax rates.")
-    return region_lookup
+    
+    product_lookup: dict[str, str] = {
+        product_id: str(product_name)
+        for product_id, product_name in read_csv_as_lookup(
+            PRODUCTS_CSV,
+            key_field="product_id",
+            value_field="product_name",
+        ).items()
+    }
+    LOG.info(f"Found {len(product_lookup)} products.")
+    
+    currency_lookup: dict[str, str] = {
+        currency_code: str(currency_name)
+        for currency_code, currency_name in read_csv_as_lookup(
+            CURRENCIES_CSV,
+            key_field="currency_code",
+            value_field="currency_name",
+        ).items()
+    }
+    LOG.info(f"Found {len(currency_lookup)} currencies.")
+    
+    return region_lookup, product_lookup, currency_lookup
 
 
 def process_message(
     row: dict[str, Any],
     *,
     region_lookup: dict[str, float],
+    product_lookup: dict[str, str],
+    currency_lookup: dict[str, str],
     stats: RunningStats,
 ) -> dict[str, Any] | None:
     """Process one consumed message.
@@ -251,11 +277,14 @@ def process_message(
     Steps:
       - Validate required fields
       - Enrich with derived fields
+      - Enrich with additional product and currency metadata
       - Update running statistics
 
     Arguments:
         row: A raw consumed Kafka message row.
         region_lookup: Tax rates by region_id.
+        product_lookup: Product names by product_id.
+        currency_lookup: Currency names by currency_code.
         stats: Running statistics accumulator.
 
     Returns:
@@ -271,6 +300,14 @@ def process_message(
 
     # Then, enrich the message with derived fields.
     enriched = enrich_message(row, region_lookup)
+
+    # Apply additional enrichment: Add product name and currency name
+    product_id = enriched.get("product_id", "")
+    enriched["product_name"] = product_lookup.get(product_id, "Unknown Product")
+
+    currency_code = enriched.get("currency_code", "")
+    enriched["currency_name"] = currency_lookup.get(currency_code, "Unknown Currency")
+
     LOG.info(f"subtotal={enriched['subtotal']}")
     LOG.info(f"tax={enriched['tax_amount']}")
     LOG.info(f"total={enriched['total']}")
@@ -285,6 +322,8 @@ def consume_messages(
     consumer: Any,
     *,
     region_lookup: dict[str, float],
+    product_lookup: dict[str, str],
+    currency_lookup: dict[str, str],
     stats: RunningStats,
 ) -> tuple[int, int]:
     """Consume and process messages from the Kafka topic.
@@ -297,6 +336,8 @@ def consume_messages(
     Arguments:
         consumer: An open Kafka consumer subscribed to the topic.
         region_lookup: Tax rates by region_id.
+        product_lookup: Product names by product_id.
+        currency_lookup: Currency names by currency_code.
         stats: Running statistics accumulator.
 
     Returns:
@@ -325,6 +366,8 @@ def consume_messages(
         enriched = process_message(
             row,
             region_lookup=region_lookup,
+            product_lookup=product_lookup,
+            currency_lookup=currency_lookup,
             stats=stats,
         )
 
@@ -412,7 +455,7 @@ def main() -> None:
     LOG.info("========================")
 
     stats = initialize_output()
-    region_lookup = load_reference_data()
+    region_lookup, product_lookup, currency_lookup = load_reference_data()
 
     consumed_count = 0
     skipped_count = 0
@@ -421,6 +464,8 @@ def main() -> None:
         consumed_count, skipped_count = consume_messages(
             consumer,
             region_lookup=region_lookup,
+            product_lookup=product_lookup,
+            currency_lookup=currency_lookup,
             stats=stats,
         )
     finally:
