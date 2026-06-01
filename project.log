@@ -1695,3 +1695,162 @@ CHECK:
 2026-05-31 16:09:56 | INFO | C03 | ========================
 2026-05-31 16:09:56 | INFO | C03 | Consumer executed successfully!
 2026-05-31 16:09:56 | INFO | C03 | ========================
+2026-05-31 17:33:45 | DEBUG | P03 | KAFKA_BOOTSTRAP_SERVERS           = localhost:9092
+2026-05-31 17:33:45 | DEBUG | P03 | KAFKA_BROKER_ADDRESS_FAMILY       = v6
+2026-05-31 17:33:45 | DEBUG | P03 | KAFKA_TOPIC                       = streaming-03-analytics-nba-pbp
+2026-05-31 17:33:45 | DEBUG | P03 | KAFKA_CLEAR_TOPIC_ON_START        = true
+2026-05-31 17:33:45 | DEBUG | P03 | PRODUCER_MESSAGE_COUNT            = 20
+2026-05-31 17:33:45 | DEBUG | P03 | PRODUCER_MESSAGE_INTERVAL_SECONDS = 2
+2026-05-31 17:33:45 | DEBUG | P03 | PRODUCER_MAX_MESSAGES             = 50
+2026-05-31 17:33:45 | DEBUG | P03 | PRODUCER_POLL_INTERVAL_SECONDS    = 15
+2026-05-31 17:33:45 | DEBUG | P03 | KAFKA_GROUP_ID                    = streaming-consumer-group-A
+2026-05-31 17:33:45 | DEBUG | P03 | KAFKA_AUTO_OFFSET_RESET           = earliest
+2026-05-31 17:33:45 | DEBUG | P03 | CONSUMER_TIMEOUT_SECONDS          = 10
+2026-05-31 17:33:45 | DEBUG | P03 | CONSUMER_MAX_MESSAGES             = 1000
+2026-05-31 17:33:45 | INFO | P03 | === RUN START ===
+2026-05-31 17:33:45 | INFO | P03 | project=P03
+2026-05-31 17:33:45 | INFO | P03 | repo_dir=streaming-03-analytics
+2026-05-31 17:33:45 | INFO | P03 | python=3.14.5
+2026-05-31 17:33:45 | INFO | P03 | os=Windows 11
+2026-05-31 17:33:45 | INFO | P03 | shell=powershell
+2026-05-31 17:33:45 | INFO | P03 | cwd=.
+2026-05-31 17:33:45 | INFO | P03 | github_actions=False
+2026-05-31 17:33:45 | INFO | P03 | ========================
+2026-05-31 17:33:45 | INFO | P03 | START producer main()
+2026-05-31 17:33:45 | INFO | P03 | ========================
+2026-05-31 17:33:45 | INFO | P03 | ROOT_DIR = .
+2026-05-31 17:33:45 | INFO | P03 | DATA_DIR = data
+2026-05-31 17:33:45 | INFO | P03 | EVENTS_CSV = data\events.csv
+2026-05-31 17:33:45 | INFO | P03 | PLAYERS_CSV = data\players.csv
+2026-05-31 17:33:45 | INFO | P03 | REJECTED_EVENTS_CSV = data\output\producer_rejected_events.csv
+2026-05-31 17:33:45 | INFO | P03 | ========================
+2026-05-31 17:33:45 | INFO | P03 | SECTION A. Acquire
+2026-05-31 17:33:45 | INFO | P03 | ========================
+2026-05-31 17:33:45 | INFO | P03 | Loading settings from .env...
+2026-05-31 17:33:45 | INFO | P03 | KAFKA_BOOTSTRAP_SERVERS           = localhost:9092
+2026-05-31 17:33:45 | INFO | P03 | KAFKA_TOPIC                       = streaming-03-analytics-nba-pbp
+2026-05-31 17:33:45 | INFO | P03 | PRODUCER_MESSAGE_COUNT            = 20
+2026-05-31 17:33:45 | INFO | P03 | PRODUCER_MESSAGE_INTERVAL_SECONDS = 2.0
+2026-05-31 17:33:45 | INFO | P03 | KAFKA_CLEAR_TOPIC_ON_START        = True
+2026-05-31 17:33:45 | INFO | P03 | Verifying Kafka connection...
+2026-05-31 17:33:45 | INFO | P03 | Kafka port is reachable.
+2026-05-31 17:33:54 | INFO | P03 | Loading validation reference data...
+2026-05-31 17:33:54 | ERROR | P03 | players.csv record 8: Required field is blank: player_name
+2026-05-31 17:33:54 | ERROR | P03 | players.csv record 8: Required field is blank: team_name
+2026-05-31 17:33:54 | ERROR | P03 | players.csv record 13: Required field is blank: player_name
+2026-05-31 17:33:54 | ERROR | P03 | players.csv record 13: Required field is blank: team_name
+2026-05-31 17:33:54 | ERROR | P03 | players.csv record 20: Required field is blank: player_name
+2026-05-31 17:33:54 | ERROR | P03 | players.csv record 20: Required field is blank: team_name
+2026-05-31 17:33:54 | ERROR | P03 | players.csv record 21: Required field is blank: team_name
+2026-05-31 17:33:54 | ERROR | P03 | players.csv record 24: Required field is blank: team_name
+2026-05-31 17:33:54 | ERROR | P03 | players.csv record 25: Required field is blank: player_name
+2026-05-31 17:33:54 | ERROR | P03 | players.csv record 25: Required field is blank: team_name
+2026-05-31 17:33:54 | ERROR | P03 | Reference data failed validation. Fix reference files first.
+2026-05-31 17:37:46 | DEBUG | P03 | KAFKA_BOOTSTRAP_SERVERS           = localhost:9092
+2026-05-31 17:37:46 | DEBUG | P03 | KAFKA_BROKER_ADDRESS_FAMILY       = v6
+2026-05-31 17:37:46 | DEBUG | P03 | KAFKA_TOPIC                       = streaming-03-analytics-nba-pbp
+2026-05-31 17:37:46 | DEBUG | P03 | KAFKA_CLEAR_TOPIC_ON_START        = true
+2026-05-31 17:37:46 | DEBUG | P03 | PRODUCER_MESSAGE_COUNT            = 20
+2026-05-31 17:37:46 | DEBUG | P03 | PRODUCER_MESSAGE_INTERVAL_SECONDS = 2
+2026-05-31 17:37:46 | DEBUG | P03 | PRODUCER_MAX_MESSAGES             = 50
+2026-05-31 17:37:46 | DEBUG | P03 | PRODUCER_POLL_INTERVAL_SECONDS    = 15
+2026-05-31 17:37:46 | DEBUG | P03 | KAFKA_GROUP_ID                    = streaming-consumer-group-A
+2026-05-31 17:37:46 | DEBUG | P03 | KAFKA_AUTO_OFFSET_RESET           = earliest
+2026-05-31 17:37:46 | DEBUG | P03 | CONSUMER_TIMEOUT_SECONDS          = 10
+2026-05-31 17:37:46 | DEBUG | P03 | CONSUMER_MAX_MESSAGES             = 1000
+2026-05-31 17:37:46 | INFO | P03 | === RUN START ===
+2026-05-31 17:37:46 | INFO | P03 | project=P03
+2026-05-31 17:37:46 | INFO | P03 | repo_dir=streaming-03-analytics
+2026-05-31 17:37:46 | INFO | P03 | python=3.14.5
+2026-05-31 17:37:46 | INFO | P03 | os=Windows 11
+2026-05-31 17:37:46 | INFO | P03 | shell=powershell
+2026-05-31 17:37:46 | INFO | P03 | cwd=.
+2026-05-31 17:37:46 | INFO | P03 | github_actions=False
+2026-05-31 17:37:46 | INFO | P03 | ========================
+2026-05-31 17:37:46 | INFO | P03 | START producer main()
+2026-05-31 17:37:46 | INFO | P03 | ========================
+2026-05-31 17:37:46 | INFO | P03 | ROOT_DIR = .
+2026-05-31 17:37:46 | INFO | P03 | DATA_DIR = data
+2026-05-31 17:37:46 | INFO | P03 | EVENTS_CSV = data\events.csv
+2026-05-31 17:37:46 | INFO | P03 | PLAYERS_CSV = data\players.csv
+2026-05-31 17:37:46 | INFO | P03 | REJECTED_EVENTS_CSV = data\output\producer_rejected_events.csv
+2026-05-31 17:37:46 | INFO | P03 | ========================
+2026-05-31 17:37:46 | INFO | P03 | SECTION A. Acquire
+2026-05-31 17:37:46 | INFO | P03 | ========================
+2026-05-31 17:37:46 | INFO | P03 | Loading settings from .env...
+2026-05-31 17:37:46 | INFO | P03 | KAFKA_BOOTSTRAP_SERVERS           = localhost:9092
+2026-05-31 17:37:46 | INFO | P03 | KAFKA_TOPIC                       = streaming-03-analytics-nba-pbp
+2026-05-31 17:37:46 | INFO | P03 | PRODUCER_MESSAGE_COUNT            = 20
+2026-05-31 17:37:46 | INFO | P03 | PRODUCER_MESSAGE_INTERVAL_SECONDS = 2.0
+2026-05-31 17:37:46 | INFO | P03 | KAFKA_CLEAR_TOPIC_ON_START        = True
+2026-05-31 17:37:46 | INFO | P03 | Verifying Kafka connection...
+2026-05-31 17:37:46 | INFO | P03 | Kafka port is reachable.
+2026-05-31 17:37:55 | INFO | P03 | Loading validation reference data...
+2026-05-31 17:37:55 | INFO | P03 | Found 25 valid players.
+2026-05-31 17:37:55 | INFO | P03 | ========================
+2026-05-31 17:37:55 | INFO | P03 | SECTION P. Produce Messages
+2026-05-31 17:37:55 | INFO | P03 | ========================
+2026-05-31 17:37:55 | INFO | P03 | Initializing output...
+2026-05-31 17:37:55 | INFO | P03 | Output directory ready: output
+2026-05-31 17:37:55 | INFO | P03 | Sending messages...
+2026-05-31 17:37:55 | INFO | P03 | Sending up to 20 message(s) to topic 'streaming-03-analytics-nba-pbp'.
+2026-05-31 17:37:55 | INFO | P03 | Watch each event arrive. Press CTRL+C to stop early.
+
+2026-05-31 17:37:55 | INFO | P03 | {
+  play_id: P0004
+  game_id: 0042500317
+  timestamp: 2026-06-01T03:37:32Z
+  player_id: PL_1631096
+  action_type: Jump Ball
+  shot_type: 2PT
+  distance_ft: 0.0
+  is_made: False
+  quarter: 1
+  time_remaining: PT12M00.00S
+}
+2026-05-31 17:37:55 | INFO | P03 |   Sending message with key=0042500317
+2026-05-31 17:37:55 | INFO | P03 |   MESSAGE SENT  sent=1
+2026-05-31 17:37:57 | INFO | P03 | {
+  play_id: P0007
+  game_id: 0042500317
+  timestamp: 2026-06-01T03:37:37Z
+  player_id: PL_1641705
+  action_type: Made Shot
+  shot_type: 2PT
+  distance_ft: 12.0
+  is_made: False
+  quarter: 1
+  time_remaining: PT11M39.00S
+}
+2026-05-31 17:37:57 | INFO | P03 |   Sending message with key=0042500317
+2026-05-31 17:37:57 | INFO | P03 |   MESSAGE SENT  sent=2
+2026-05-31 17:37:59 | INFO | P03 | {
+  play_id: P0008
+  game_id: 0042500317
+  timestamp: 2026-06-01T03:37:42Z
+  player_id: PL_1631096
+  action_type: Turnover
+  shot_type: 2PT
+  distance_ft: 0.0
+  is_made: False
+  quarter: 1
+  time_remaining: PT11M21.00S
+}
+2026-05-31 17:37:59 | INFO | P03 |   Sending message with key=0042500317
+2026-05-31 17:37:59 | INFO | P03 |   MESSAGE SENT  sent=3
+2026-05-31 17:38:01 | INFO | P03 | {
+  play_id: P0008
+  game_id: 0042500317
+  timestamp: 2026-06-01T03:37:47Z
+  player_id: PL_1630170
+  action_type: 
+  shot_type: 2PT
+  distance_ft: 0.0
+  is_made: False
+  quarter: 1
+  time_remaining: PT11M21.00S
+}
+2026-05-31 17:38:01 | WARNING | P03 | MESSAGE REJECTED
+2026-05-31 17:38:01 | WARNING | P03 |   errors=['Required field is blank: action_type']
+2026-05-31 17:38:01 | ERROR | P03 | dict contains fields not in fieldnames: 'quarter', 'time_remaining'
+2026-05-31 17:38:01 | ERROR | P03 | Producer stopped before completing all messages.

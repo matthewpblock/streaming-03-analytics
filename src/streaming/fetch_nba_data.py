@@ -39,11 +39,17 @@ def fetch_game_data(game_id: str):
             
         play_id = f"P{row['actionNumber']:04d}"
         pid = f"PL_{row['personId']}"
-        player_name = row.get('playerName', 'Unknown Player')
+        player_name = row.get('playerName')
         
         team_city = row.get('teamCity', '')
         team_tricode = row.get('teamTricode', '')
         team_name = f"{team_city} {team_tricode}".strip()
+
+        # Handle cases where player or team name is missing for non-player events
+        if not player_name:
+            player_name = "NBA Official"
+        if not team_name:
+            team_name = "NBA"
 
         # Update our player reference lookup table
         if pid not in players:
