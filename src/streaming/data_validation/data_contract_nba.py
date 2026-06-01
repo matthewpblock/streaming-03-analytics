@@ -93,7 +93,7 @@ CONSUMED_FIELDNAMES: Final[list[str]] = [
 ]
 
 REJECTED_EVENTS_FIELDNAMES: Final[list[str]] = [
-    *EVENTS_REQUIRED_FIELDS,
+    *VALID_EVENTS_FIELDNAMES,
     "validation_errors",
 ]
 

@@ -1,0 +1,12 @@
+play_id,game_id,timestamp,player_id,action_type,shot_type,distance_ft,is_made,player_name,team_name,points_scored,shot_quality_category,clutch_shot_flag,_kafka_key,_kafka_partition,_kafka_offset
+P0007,0042500317,2026-06-01T03:43:29Z,PL_1641705,Made Shot,2PT,12.0,True,Wembanyama,SAS,2,Paint,False,0042500317,0,1
+P0013,0042500317,2026-06-01T03:43:49Z,PL_1630170,Made Shot,2PT,14.0,True,Vassell,SAS,2,Paint,False,0042500317,0,5
+P0014,0042500317,2026-06-01T03:43:54Z,PL_1631096,Made Shot,2PT,12.0,True,Holmgren,OKC,2,Paint,False,0042500317,0,6
+P0016,0042500317,2026-06-01T03:43:59Z,PL_1642264,Made Shot,2PT,1.0,True,Castle,SAS,2,Restricted Area,False,0042500317,0,7
+P0018,0042500317,2026-06-01T03:44:04Z,PL_1628983,Made Shot,2PT,19.0,True,Gilgeous-Alexander,OKC,2,Mid-Range,False,0042500317,0,8
+P0019,0042500317,2026-06-01T03:44:09Z,PL_1642264,Made Shot,2PT,1.0,True,Castle,SAS,2,Restricted Area,False,0042500317,0,9
+P0021,0042500317,2026-06-01T03:44:14Z,PL_1631096,Missed Shot,2PT,8.0,False,Holmgren,OKC,0,Paint,False,0042500317,0,10
+P0023,0042500317,2026-06-01T03:44:24Z,PL_1629652,Missed Shot,3PT,25.0,False,Dort,OKC,0,NBA Deep 3,False,0042500317,0,12
+P0026,0042500317,2026-06-01T03:44:34Z,PL_1641705,Made Shot,2PT,2.0,True,Wembanyama,SAS,2,Restricted Area,False,0042500317,0,14
+P0028,0042500317,2026-06-01T03:44:39Z,PL_1629652,Missed Shot,3PT,26.0,False,Dort,OKC,0,NBA Deep 3,False,0042500317,0,15
+P0030,0042500317,2026-06-01T03:44:49Z,PL_1630170,Missed Shot,3PT,0.0,False,Vassell,SAS,0,Restricted Area,False,0042500317,0,17

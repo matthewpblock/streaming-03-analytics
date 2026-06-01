@@ -254,10 +254,10 @@ def load_reference_data() -> tuple[dict[str, str], dict[str, str]]:
     """
     LOG.info("Loading enrichment reference data...")
     player_name_lookup = {
-        pid: str(pname) for pid, pname in read_csv_as_lookup(PLAYERS_CSV, "player_id", "player_name").items()
+        pid: str(pname) for pid, pname in read_csv_as_lookup(PLAYERS_CSV, key_field="player_id", value_field="player_name").items()
     }
     team_name_lookup = {
-        pid: str(tname) for pid, tname in read_csv_as_lookup(PLAYERS_CSV, "player_id", "team_name").items()
+        pid: str(tname) for pid, tname in read_csv_as_lookup(PLAYERS_CSV, key_field="player_id", value_field="team_name").items()
     }
     LOG.info(f"Loaded {len(player_name_lookup)} players.")
     return player_name_lookup, team_name_lookup
@@ -297,13 +297,10 @@ def process_message(
         LOG.warning(f"errors={errors}")
         return None
 
-    # Filter for shot events only (action_type 1, 2, or 3)
-    try:
-        action_type = int(row.get("action_type", 0))
-    except (ValueError, TypeError):
-        action_type = 0
-
-    if action_type not in {1, 2, 3}:
+    # Filter for shot events only
+    action_type = str(row.get("action_type", ""))
+    
+    if action_type not in {"Made Shot", "Missed Shot", "Free Throw"}:
         LOG.info(f"Skipping non-shot event: play_id={row.get('play_id')}, action_type={action_type}")
         # Return None to have this non-shot event be counted as "skipped"
         return None

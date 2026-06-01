@@ -85,12 +85,17 @@ def fetch_game_data(game_id: str):
         else:
             distance_ft = float(distance_ft)
 
+        # Clean up action_type to avoid blank validation errors
+        action_type = str(row.get('actionType', '')).strip()
+        if not action_type or action_type == 'nan':
+            action_type = 'Unknown'
+
         # 3. Parse if the shot was made
-        if row['actionType'] == 1:
+        if action_type == 'Made Shot':
             is_made = True
-        elif row['actionType'] == 2:
+        elif action_type == 'Missed Shot':
             is_made = False
-        elif row['actionType'] == 3:
+        elif action_type == 'Free Throw':
             is_made = 'MISS' not in desc
         else:
             is_made = False
@@ -103,7 +108,7 @@ def fetch_game_data(game_id: str):
             "game_id": game_id,
             "timestamp": timestamp,
             "player_id": pid,
-            "action_type": row['actionType'],
+            "action_type": action_type,
             "shot_type": shot_type,
             "distance_ft": distance_ft,
             "is_made": is_made,
