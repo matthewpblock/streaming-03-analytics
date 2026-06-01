@@ -1,6 +1,6 @@
 """src/streaming/kafka_producer_nba.py - Kafka producer.
 
-Reads shots from data/shots.csv,
+Reads events from data/events.csv,
 validates them against the data contract,
 writes rejected records to a local CSV file,
 and sends valid records to a Kafka topic one message at a time.
@@ -51,8 +51,8 @@ from dotenv import load_dotenv
 from streaming.core.utils import log_env_vars
 from streaming.data_validation.data_contract_nba import (
     PLAYERS_REQUIRED_FIELDS,
-    REJECTED_SHOTS_FIELDNAMES,
-    validate_shot_record,
+    REJECTED_EVENTS_FIELDNAMES,
+    validate_event_record,
 )
 from streaming.data_validation.data_validation_nba import (
     add_validation_errors,
@@ -85,9 +85,9 @@ ROOT_DIR: Final[Path] = Path.cwd()
 DATA_DIR: Final[Path] = ROOT_DIR / "data"
 OUTPUT_DIR: Final[Path] = DATA_DIR / "output"
 
-SHOTS_CSV: Final[Path] = DATA_DIR / "shots.csv"
+EVENTS_CSV: Final[Path] = DATA_DIR / "events.csv"
 PLAYERS_CSV: Final[Path] = DATA_DIR / "players.csv"
-REJECTED_SHOTS_CSV: Final[Path] = OUTPUT_DIR / "producer_rejected_shots.csv"
+REJECTED_EVENTS_CSV: Final[Path] = OUTPUT_DIR / "producer_rejected_events.csv"
 
 
 # ==========================================================
@@ -103,9 +103,9 @@ def log_paths() -> None:
     LOG.info("========================")
     log_path(LOG, "ROOT_DIR", ROOT_DIR)
     log_path(LOG, "DATA_DIR", DATA_DIR)
-    log_path(LOG, "SHOTS_CSV", SHOTS_CSV)
+    log_path(LOG, "EVENTS_CSV", EVENTS_CSV)
     log_path(LOG, "PLAYERS_CSV", PLAYERS_CSV)
-    log_path(LOG, "REJECTED_SHOTS_CSV", REJECTED_SHOTS_CSV)
+    log_path(LOG, "REJECTED_EVENTS_CSV", REJECTED_EVENTS_CSV)
 
 
 def load_settings() -> KafkaSettings:
@@ -196,10 +196,10 @@ def load_reference_data() -> set[str]:
 
 
 def get_message_key(message: dict[str, Any]) -> str:
-    """Return the Kafka message key for a shot record.
+    """Return the Kafka message key for an event record.
 
     We use game_id as the message key
-    so all shots from the same game
+    so all events from the same game
     go to the same Kafka partition,
     keeping them in order.
     """
@@ -214,20 +214,20 @@ def get_message_key(message: dict[str, Any]) -> str:
 
 
 def generate_messages(count: int) -> Generator[dict[str, str]]:
-    """Generate a stream of shots from the input CSV file.
+    """Generate a stream of events from the input CSV file.
 
     A generator function uses yield instead of return.
     It produces one value at a time instead of computing everything at once.
     This is how we model data in motion, one event arriving at a time.
 
     Arguments:
-        count: How many shots to generate.
+        count: How many events to generate.
 
     Yields:
-        One shot row dictionary at a time.
+        One event row dictionary at a time.
     """
-    shot_rows = read_csv_rows(SHOTS_CSV)
-    yield from shot_rows[:count]
+    event_rows = read_csv_rows(EVENTS_CSV)
+    yield from event_rows[:count]
 
 
 def write_rejected_record(record: DataRecordDict, errors: list[str]) -> None:
@@ -238,9 +238,9 @@ def write_rejected_record(record: DataRecordDict, errors: list[str]) -> None:
         errors: A list of validation error messages to include in the output.
     """
     append_csv_row(
-        path=REJECTED_SHOTS_CSV,
+        path=REJECTED_EVENTS_CSV,
         row=add_validation_errors(record=record, errors=errors),
-        fieldnames=REJECTED_SHOTS_FIELDNAMES,
+        fieldnames=REJECTED_EVENTS_FIELDNAMES,
     )
 
 
@@ -257,8 +257,8 @@ def initialize_output() -> None:
 
     # if the rejected CSV already exists from a prior run,
     # delete it and start fresh.
-    if REJECTED_SHOTS_CSV.exists():
-        REJECTED_SHOTS_CSV.unlink()
+    if REJECTED_EVENTS_CSV.exists():
+        REJECTED_EVENTS_CSV.unlink()
 
     LOG.info(f"Output directory ready: {OUTPUT_DIR.name}")
 
@@ -285,7 +285,7 @@ def send_messages(
     """
     LOG.info("Sending messages...")
     LOG.info(f"Sending up to {MESSAGE_COUNT} message(s) to topic {settings.topic!r}.")
-    LOG.info("Watch each shot arrive. Press CTRL+C to stop early.\n")
+    LOG.info("Watch each event arrive. Press CTRL+C to stop early.\n")
 
     # initialize counters for summary stats at the end
     sent_count = 0
@@ -296,7 +296,7 @@ def send_messages(
         for message in generate_messages(MESSAGE_COUNT):
             LOG.info(format_message_for_log(message))
 
-            result = validate_shot_record(
+            result = validate_event_record(
                 record=message,
                 valid_player_ids=valid_player_ids,
             )
@@ -343,7 +343,7 @@ def log_rejected(rejected_count: int) -> None:
     """
     LOG.info("Checking for rejected records...")
     if rejected_count > 0:
-        log_path(LOG, "  WROTE REJECTED_SHOTS_CSV", REJECTED_SHOTS_CSV)
+        log_path(LOG, "  WROTE REJECTED_EVENTS_CSV", REJECTED_EVENTS_CSV)
     else:
         LOG.info("  No records rejected.")
 

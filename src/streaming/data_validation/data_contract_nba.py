@@ -43,24 +43,25 @@ from datafun_streaming.data_validation.validation_utils import (
 
 # === EVENT TABLE FIELDS ===
 
-SHOTS_REQUIRED_FIELDS: Final[list[str]] = [
+EVENTS_REQUIRED_FIELDS: Final[list[str]] = [
     "play_id",
     "game_id",
     "timestamp",
     "player_id",
+    "action_type",
     "shot_type",
     "distance_ft",
     "is_made",
 ]
 
-SHOTS_OPTIONAL_FIELDS: Final[list[str]] = [
+EVENTS_OPTIONAL_FIELDS: Final[list[str]] = [
     "quarter",
     "time_remaining",
 ]
 
-VALID_SHOTS_FIELDNAMES: Final[list[str]] = [
-    *SHOTS_REQUIRED_FIELDS,
-    *SHOTS_OPTIONAL_FIELDS,
+VALID_EVENTS_FIELDNAMES: Final[list[str]] = [
+    *EVENTS_REQUIRED_FIELDS,
+    *EVENTS_OPTIONAL_FIELDS,
 ]
 
 
@@ -80,7 +81,7 @@ ALLOWED_SHOT_TYPES: Final[set[str]] = {"2PT", "3PT", "FT"}
 # === OUTPUT FIELD ORDER ===
 
 CONSUMED_FIELDNAMES: Final[list[str]] = [
-    *SHOTS_REQUIRED_FIELDS,
+    *EVENTS_REQUIRED_FIELDS,
     "player_name",
     "team_name",
     "points_scored",
@@ -91,8 +92,8 @@ CONSUMED_FIELDNAMES: Final[list[str]] = [
     "_kafka_offset",
 ]
 
-REJECTED_SHOTS_FIELDNAMES: Final[list[str]] = [
-    *SHOTS_REQUIRED_FIELDS,
+REJECTED_EVENTS_FIELDNAMES: Final[list[str]] = [
+    *EVENTS_REQUIRED_FIELDS,
     "validation_errors",
 ]
 
@@ -100,12 +101,12 @@ REJECTED_SHOTS_FIELDNAMES: Final[list[str]] = [
 # === DOMAIN-SPECIFIC VALIDATION ===
 
 
-def validate_shot_record(
+def validate_event_record(
     *,
     record: DataRecordDict,
     valid_player_ids: set[str],
 ) -> ValidationResult:
-    """Validate one shot record against this project's data contract.
+    """Validate one event record against this project's data contract.
 
     This function can be enhanced.
 
@@ -124,11 +125,11 @@ def validate_shot_record(
     # Validate the required fields, get a list back,
     # and extend the errors list with any errors found.
     # This is a concise form of:
-    # required_field_errors = validate_required_fields(record=record, required_fields=SHOTS_REQUIRED_FIELDS)
+    # required_field_errors = validate_required_fields(record=record, required_fields=EVENTS_REQUIRED_FIELDS)
     # errors.extend(required_field_errors)
     # Use whichever you prefer.
     errors.extend(
-        validate_required_fields(record=record, required_fields=SHOTS_REQUIRED_FIELDS)
+        validate_required_fields(record=record, required_fields=EVENTS_REQUIRED_FIELDS)
     )
 
     if errors:
@@ -176,8 +177,8 @@ def validate_shot_record(
 # === OUTPUT HELPERS ===
 
 
-def keep_shots_fields(row: dict[str, Any]) -> dict[str, Any]:
-    """Return only required shot fields in standard order.
+def keep_events_fields(row: dict[str, Any]) -> dict[str, Any]:
+    """Return only required event fields in standard order.
 
     This is used to create the output message for both valid and rejected records.
 
@@ -187,4 +188,4 @@ def keep_shots_fields(row: dict[str, Any]) -> dict[str, Any]:
     Returns:
         A new dict with only the required fields in the standard order.
     """
-    return {field: row.get(field, "") for field in SHOTS_REQUIRED_FIELDS}
+    return {field: row.get(field, "") for field in EVENTS_REQUIRED_FIELDS}

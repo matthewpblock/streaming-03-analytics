@@ -22,17 +22,18 @@ We learn by doing.
 
 This project focuses on analytics performed as messages are consumed.
 
-The project uses Kafka to move sales messages from a producer to a consumer.
-The consumer reads each message, validates required fields, computes derived values,
-enriches the data with additional reference sources (like product and currency metadata),
+The project uses Kafka to move NBA play-by-play event messages from a producer to a consumer.
+The consumer reads each event, validates required fields, filters for shots, computes derived values,
+enriches the data with player metadata,
 writes processed records to CSV, and logs running summary statistics.
 
 Key analytics and enrichment features include:
+- **Live Data Fetching:** Pulling play-by-play data from the live `nba_api`.
 - **Data Validation:** Checking incoming messages against a predefined data contract.
-- **Reference Data Lookup:** Appending `product_name` and `currency_name` from external CSV sources.
-- **Discount Processing:** Calculating `discount_amount` using active discount codes.
-- **Currency Normalization:** Applying exchange rates to compute a standardized `total_usd` for unified downstream aggregation.
-- **Running Statistics:** Tracking total, average, min, and max sales as events arrive.
+- **Event Filtering:** Consuming all game events but processing only shot attempts.
+- **Shot Analytics:** Calculating `points_scored` and `shot_quality_category` for each attempt.
+- **Player Enrichment:** Appending `player_name` and `team_name` from a reference lookup.
+- **Running Statistics:** Tracking total points, average, min, and max as shots arrive.
 
 This module adds validation and message-by-message analytics to the streaming workflow.
 
@@ -180,7 +181,7 @@ bin/kafka-topics.sh --create \
   --bootstrap-server localhost:9092 \
   --partitions 1 \
   --replication-factor 1 \
-  --topic streaming-03-analytics-critical-section
+  --topic streaming-03-analytics-nba-pbp
 ```
 
 ### In VS Code Terminal 3: Run Project and Producer (producer)
@@ -207,7 +208,9 @@ uvx pre-commit run --all-files
 
 # run the producer
 clear
-uv run python src/streaming/kafka_producer_critical_section.py
+uv run python src/streaming/fetch_nba_data.py
+clear
+uv run python src/streaming/kafka_producer_nba.py
 
 # do chores
 uv run ruff format .
@@ -231,7 +234,7 @@ Clear the terminal, then start the consumer.
 
 ```shell
 clear
-uv run python src/streaming/kafka_consumer_critical_section.py
+uv run python src/streaming/kafka_consumer_nba.py
 ```
 
 To start fresh, see

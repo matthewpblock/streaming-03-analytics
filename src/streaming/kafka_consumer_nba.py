@@ -2,7 +2,7 @@
 
 Kafka consumer: analytics
 
-Reads shot messages from a Kafka topic and runs the full pipeline:
+Reads event messages from a Kafka topic and runs the full pipeline:
   - Validates each message against the data contract
   - Computes derived fields (points_scored, shot_quality, clutch_shot)
 
@@ -50,7 +50,7 @@ from dotenv import load_dotenv
 from streaming.core.utils import log_env_vars
 from streaming.data_validation.data_contract_nba import (
     CONSUMED_FIELDNAMES,
-    SHOTS_REQUIRED_FIELDS,
+    EVENTS_REQUIRED_FIELDS,
     validate_required_fields,
 )
 
@@ -75,7 +75,7 @@ ROOT_DIR: Final[Path] = Path.cwd()
 DATA_DIR: Final[Path] = ROOT_DIR / "data"
 OUTPUT_DIR: Final[Path] = DATA_DIR / "output"
 
-OUTPUT_CSV: Final[Path] = OUTPUT_DIR / "consumed_shots.csv"
+OUTPUT_CSV: Final[Path] = OUTPUT_DIR / "consumed_events.csv"
 
 PLAYERS_CSV: Final[Path] = DATA_DIR / "players.csv"
 
@@ -116,7 +116,7 @@ def compute_shot_quality(distance_ft: float) -> str:
 def is_clutch_shot(quarter: str) -> bool:
     return quarter.upper() in ("4", "Q4", "OT", "4TH")
 
-def enrich_shot_message(row: dict[str, Any]) -> dict[str, Any]:
+def enrich_event_message(row: dict[str, Any]) -> dict[str, Any]:
     shot_type = str(row.get("shot_type", ""))
     is_made = str(row.get("is_made", "False")).lower() in ("true", "1", "yes", "t")
     distance_ft = float(row.get("distance_ft", 0.0))
@@ -291,14 +291,25 @@ def process_message(
     """
     # First, validate the message against the data contract.
     # If validation fails, return None to indicate the message should be rejected.
-    errors = validate_required_fields(record=row, required_fields=SHOTS_REQUIRED_FIELDS)
+    errors = validate_required_fields(record=row, required_fields=EVENTS_REQUIRED_FIELDS)
     if errors:
         LOG.warning(f"Validation failed for play {row.get('play_id', '?')}")
         LOG.warning(f"errors={errors}")
         return None
 
+    # Filter for shot events only (action_type 1, 2, or 3)
+    try:
+        action_type = int(row.get("action_type", 0))
+    except (ValueError, TypeError):
+        action_type = 0
+
+    if action_type not in {1, 2, 3}:
+        LOG.info(f"Skipping non-shot event: play_id={row.get('play_id')}, action_type={action_type}")
+        # Return None to have this non-shot event be counted as "skipped"
+        return None
+
     # Then, enrich the message with derived fields.
-    enriched = enrich_shot_message(row)
+    enriched = enrich_event_message(row)
     pid = enriched.get("player_id", "")
     enriched["player_name"] = player_name_lookup.get(pid, "Unknown Player")
     enriched["team_name"] = team_name_lookup.get(pid, "Unknown Team")
