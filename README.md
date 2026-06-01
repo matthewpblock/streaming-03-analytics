@@ -24,12 +24,20 @@ This project focuses on analytics performed as messages are consumed.
 
 The project uses Kafka to move sales messages from a producer to a consumer.
 The consumer reads each message, validates required fields, computes derived values,
+enriches the data with additional reference sources (like product and currency metadata),
 writes processed records to CSV, and logs running summary statistics.
+
+Key analytics and enrichment features include:
+- **Data Validation:** Checking incoming messages against a predefined data contract.
+- **Reference Data Lookup:** Appending `product_name` and `currency_name` from external CSV sources.
+- **Discount Processing:** Calculating `discount_amount` using active discount codes.
+- **Currency Normalization:** Applying exchange rates to compute a standardized `total_usd` for unified downstream aggregation.
+- **Running Statistics:** Tracking total, average, min, and max sales as events arrive.
 
 This module adds validation and message-by-message analytics to the streaming workflow.
 
 The goal is to see how each incoming message can be checked, transformed,
-and summarized without waiting for a batch process.
+enriched, and summarized without waiting for a batch process.
 
 ## Working Files
 
@@ -101,7 +109,7 @@ open a machine terminal in your `Repos` folder:
 
 ```bash
 # Replace username with YOUR GitHub username.
-git clone https://github.com/username/streaming-03-analytics
+git clone https://github.com/matthewpblock/streaming-03-analytics
 
 cd streaming-03-analytics
 code .
@@ -172,7 +180,7 @@ bin/kafka-topics.sh --create \
   --bootstrap-server localhost:9092 \
   --partitions 1 \
   --replication-factor 1 \
-  --topic streaming-03-analytics-case
+  --topic streaming-03-analytics-critical-section
 ```
 
 ### In VS Code Terminal 3: Run Project and Producer (producer)
@@ -199,7 +207,7 @@ uvx pre-commit run --all-files
 
 # run the producer
 clear
-uv run python src/streaming/kafka_producer_case.py
+uv run python src/streaming/kafka_producer_critical_section.py
 
 # do chores
 uv run ruff format .
@@ -223,7 +231,7 @@ Clear the terminal, then start the consumer.
 
 ```shell
 clear
-uv run python src/streaming/kafka_consumer_case.py
+uv run python src/streaming/kafka_consumer_critical_section.py
 ```
 
 To start fresh, see

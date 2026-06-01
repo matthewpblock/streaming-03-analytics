@@ -1,4 +1,21 @@
-order_id,datetime,region_id,currency_code,product_id,unit_price,quantity,is_online,customer_id,payment_method,subtotal,tax_amount,total,_kafka_key,_kafka_partition,_kafka_offset
-e7324981-a9f0-419f-b708-d0a333451fff,2026-05-04T08:11:00Z,US-TX,USD,PY-STREAM-005,59.99,3,true,CUST-4150,paypal,179.97,14.85,194.82,US-TX,0,0
-d61943e0-f543-4b5f-9c9a-18605ea4cfe5,2026-05-04T08:23:00Z,US-TX,USD,PY-DATA-002,49.99,1,true,CUST-1106,paypal,49.99,4.12,54.11,US-TX,0,1
-14da1915-8e74-47be-9e10-f7275d31af46,2026-05-04T08:28:00Z,CA-QC,CAD,PY-NLP-006,54.99,1,true,CUST-2133,paypal,54.99,8.23,63.22,CA-QC,0,2
+order_id,datetime,region_id,currency_code,product_id,unit_price,quantity,is_online,customer_id,payment_method,product_name,currency_name,subtotal,discount_amount,tax_amount,total,total_usd,_kafka_key,_kafka_partition,_kafka_offset
+e7324981-a9f0-419f-b708-d0a333451fff,2026-05-04T08:11:00Z,US-TX,USD,PY-STREAM-005,59.99,3,true,CUST-4150,paypal,Streaming Data with Python,US Dollar,179.97,0.0,14.85,194.82,194.82,US-TX,0,0
+d61943e0-f543-4b5f-9c9a-18605ea4cfe5,2026-05-04T08:23:00Z,US-TX,USD,PY-DATA-002,49.99,1,true,CUST-1106,paypal,Data Analytics with Python,US Dollar,49.99,0.0,4.12,54.11,54.11,US-TX,0,1
+14da1915-8e74-47be-9e10-f7275d31af46,2026-05-04T08:28:00Z,CA-QC,CAD,PY-NLP-006,54.99,1,true,CUST-2133,paypal,Applied NLP with Python,Canadian Dollar,54.99,0.0,8.23,63.22,46.15,CA-QC,0,2
+d77ed935-9b28-431d-bc25-0a3fd98f4154,2026-05-04T08:40:00Z,US-CA,USD,PY-STREAM-005,59.99,1,true,CUST-5333,paypal,Streaming Data with Python,US Dollar,59.99,0.0,5.7,65.69,65.69,US-CA,0,3
+24b91995-25f8-4ad7-8fa6-2e4c15750e5e,2026-05-04T08:41:00Z,US-MO,USD,PY-VIZ-003,39.99,1,true,CUST-8573,apple_pay,Data Visualization with Python,US Dollar,39.99,0.0,3.2,43.19,43.19,US-MO,0,4
+1ec0fc8b-998c-4f43-8a66-19e1fa7d5fa8,2026-05-04T08:54:00Z,CA-ON,CAD,PY-SQL-004,44.99,1,true,CUST-8062,paypal,Databases and SQL with Python,Canadian Dollar,44.99,0.0,5.85,50.84,37.11,CA-ON,0,5
+392dd49b-b385-499c-9b4a-a38387fa39ae,2026-05-04T09:07:00Z,CA-ON,CAD,PY-INTRO-001,29.99,1,false,CUST-9348,credit_card,Python for Beginners,Canadian Dollar,29.99,0.0,3.9,33.89,24.74,CA-ON,0,6
+02782ab7-dd7d-4ebe-8abc-ef81cdc4193b,2026-05-04T09:15:00Z,US-CA,USD,PY-VIZ-003,39.99,1,true,CUST-5889,paypal,Data Visualization with Python,US Dollar,39.99,0.0,3.8,43.79,43.79,US-CA,0,7
+67bd3492-cc96-429a-9a91-1b4d2132d261,2026-05-04T09:19:00Z,CA-ON,CAD,PY-VIZ-003,39.99,1,true,CUST-4770,credit_card,Data Visualization with Python,Canadian Dollar,39.99,0.0,5.2,45.19,32.99,CA-ON,0,8
+0a021628-6937-4876-8875-b00c07a39e0f,2026-05-04T09:37:00Z,MX-CMX,MXN,PY-DATA-002,49.99,1,true,CUST-6168,paypal,Data Analytics with Python,Mexican Peso,49.99,0.0,8.0,57.99,2.96,MX-CMX,0,9
+b05fc600-a5fc-4826-934c-cc1f188b0715,2026-05-04T09:42:00Z,US-MO,USD,PY-DATA-002,49.99,3,true,CUST-3340,credit_card,Data Analytics with Python,US Dollar,149.97,0.0,12.0,161.97,161.97,US-MO,0,10
+03d437fb-6966-47ad-a67a-728630c8b3f8,2026-05-04T10:06:00Z,US-MO,USD,PY-INTRO-001,29.99,1,true,CUST-8668,apple_pay,Python for Beginners,US Dollar,29.99,0.0,2.4,32.39,32.39,US-MO,0,11
+6914aea4-448f-4dc1-b68f-0fe4a2c06188,2026-05-04T10:15:00Z,US-TX,USD,PY-DATA-002,49.99,1,true,CUST-2827,credit_card,Data Analytics with Python,US Dollar,49.99,0.0,4.12,54.11,54.11,US-TX,0,12
+e1adb233-3aa8-4d60-9684-1ddf52e9d656,2026-05-04T10:16:00Z,US-MO,USD,PY-STREAM-005,59.99,5,false,CUST-4295,paypal,Streaming Data with Python,US Dollar,299.95,0.0,24.0,323.95,323.95,US-MO,0,13
+80e9a9ea-9add-4d51-981a-d26aaacd4dc9,2026-05-04T10:30:00Z,US-MO,USD,PY-DATA-002,49.99,1,true,CUST-8953,credit_card,Data Analytics with Python,US Dollar,49.99,0.0,4.0,53.99,53.99,US-MO,0,14
+68920c43-44f0-4e51-bd21-7904c9427810,2026-05-04T10:43:00Z,CA-ON,CAD,PY-INTRO-001,29.99,1,true,CUST-1488,apple_pay,Python for Beginners,Canadian Dollar,29.99,0.0,3.9,33.89,24.74,CA-ON,0,15
+d22acb5c-8fa2-437a-be68-16a3407c5919,2026-05-04T10:43:00Z,US-MO,USD,PY-SQL-004,44.99,1,true,CUST-1319,credit_card,Databases and SQL with Python,US Dollar,44.99,0.0,3.6,48.59,48.59,US-MO,0,16
+89715d88-8d25-4fee-9179-438fe49ebd60,2026-05-04T11:00:00Z,US-TX,USD,PY-INTRO-001,29.99,1,true,CUST-6977,credit_card,Python for Beginners,US Dollar,29.99,0.0,2.47,32.46,32.46,US-TX,0,17
+733e6b9b-c9e7-49ef-82d8-b976d0df90cc,2026-05-04T11:06:00Z,MX-CMX,MXN,PY-INTRO-001,29.99,1,true,CUST-9099,paypal,Python for Beginners,Mexican Peso,29.99,0.0,4.8,34.79,1.77,MX-CMX,0,18
+267b5686-afa9-4ce6-bf68-4b861afa6a29,2026-05-04T11:10:00Z,US-MO,USD,PY-NLP-006,54.99,5,true,CUST-4878,apple_pay,Applied NLP with Python,US Dollar,274.95,0.0,22.0,296.95,296.95,US-MO,0,19

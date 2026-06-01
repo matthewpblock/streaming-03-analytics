@@ -219,7 +219,9 @@ def initialize_output() -> RunningStats:
     return RunningStats()
 
 
-def load_reference_data() -> tuple[dict[str, float], dict[str, str], dict[str, str], dict[str, float], dict[str, float]]:
+def load_reference_data() -> tuple[
+    dict[str, float], dict[str, str], dict[str, str], dict[str, float], dict[str, float]
+]:
     """Load reference data used for message enrichment.
 
     Returns:
@@ -240,7 +242,7 @@ def load_reference_data() -> tuple[dict[str, float], dict[str, str], dict[str, s
         ).items()
     }
     LOG.info(f"Found {len(region_lookup)} region tax rates.")
-    
+
     product_lookup: dict[str, str] = {
         product_id: str(product_name)
         for product_id, product_name in read_csv_as_lookup(
@@ -250,7 +252,7 @@ def load_reference_data() -> tuple[dict[str, float], dict[str, str], dict[str, s
         ).items()
     }
     LOG.info(f"Found {len(product_lookup)} products.")
-    
+
     currency_lookup: dict[str, str] = {
         currency_code: str(currency_name)
         for currency_code, currency_name in read_csv_as_lookup(
@@ -260,7 +262,7 @@ def load_reference_data() -> tuple[dict[str, float], dict[str, str], dict[str, s
         ).items()
     }
     LOG.info(f"Found {len(currency_lookup)} currencies.")
-    
+
     exchange_rate_lookup: dict[str, float] = {
         currency_code: float(exchange_rate)
         for currency_code, exchange_rate in read_csv_as_lookup(
@@ -281,7 +283,13 @@ def load_reference_data() -> tuple[dict[str, float], dict[str, str], dict[str, s
     }
     LOG.info(f"Found {len(discount_lookup)} discount codes.")
 
-    return region_lookup, product_lookup, currency_lookup, exchange_rate_lookup, discount_lookup
+    return (
+        region_lookup,
+        product_lookup,
+        currency_lookup,
+        exchange_rate_lookup,
+        discount_lookup,
+    )
 
 
 def process_message(
@@ -494,7 +502,13 @@ def main() -> None:
     LOG.info("========================")
 
     stats = initialize_output()
-    region_lookup, product_lookup, currency_lookup, exchange_rate_lookup, discount_lookup = load_reference_data()
+    (
+        region_lookup,
+        product_lookup,
+        currency_lookup,
+        exchange_rate_lookup,
+        discount_lookup,
+    ) = load_reference_data()
 
     consumed_count = 0
     skipped_count = 0
