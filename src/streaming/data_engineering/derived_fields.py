@@ -117,6 +117,8 @@ def enrich_message(
     Arguments:
         row: A validated raw message row.
         region_lookup: A dict mapping region_id to tax_rate_pct.
+        discount_lookup: A dict mapping discount_code to discount_pct.
+        exchange_rate_lookup: A dict mapping currency_code to exchange_rate.
 
     Returns:
         A new dict containing all original fields plus derived fields.

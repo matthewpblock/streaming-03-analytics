@@ -5,9 +5,9 @@
 
 [project]
 site_name = "streaming-03-analytics"
-site_url = "https://denisecase.github.io/streaming-03-analytics/"
-repo_url = "https://github.com/denisecase/streaming-03-analytics"
-repo_name = "denisecase/streaming-03-analytics"
+site_url = "https://matthewpblock.github.io/streaming-03-analytics/"
+repo_url = "https://github.com/matthewpblock/streaming-03-analytics"
+repo_name = "matthewpblock/streaming-03-analytics"
 site_description = "Project documentation"
 docs_dir = "docs"
 site_dir = "site"
@@ -16,7 +16,7 @@ edit_uri = "edit/main/docs/"
 [project.extra]
 # WHY: Social links provide easy access to project repositories and profiles.
 social = [
-    {icon = "fontawesome/brands/github", link = "https://github.com/denisecase/streaming-03-analytics"},
+    {icon = "fontawesome/brands/github", link = "https://github.com/matthewpblock/streaming-03-analytics"},
 ]
 
 # ------------------------------------------------------------

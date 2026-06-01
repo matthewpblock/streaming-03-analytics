@@ -100,23 +100,62 @@ def log_paths() -> None:
 # === BASKETBALL DERIVED FIELD LOGIC ===
 
 def compute_points_scored(shot_type: str, is_made: bool) -> int:
+    """Calculate points scored for the shot.
+
+    Arguments:
+        shot_type: The type of shot (e.g., 2PT, 3PT, FT).
+        is_made: Whether the shot was made.
+
+    Returns:
+        The number of points scored.
+    """
     if not is_made:
         return 0
-    if shot_type == "3PT": return 3
-    if shot_type == "2PT": return 2
-    if shot_type == "FT": return 1
+    if shot_type == "3PT":
+        return 3
+    if shot_type == "2PT":
+        return 2
+    if shot_type == "FT":
+        return 1
     return 0
 
 def compute_shot_quality(distance_ft: float) -> str:
-    if distance_ft > 23.75: return "NBA Deep 3"
-    if distance_ft >= 15.0: return "Mid-Range"
-    if distance_ft >= 4.0: return "Paint"
+    """Categorize the shot based on distance.
+
+    Arguments:
+        distance_ft: The distance of the shot in feet.
+
+    Returns:
+        A string category for the shot quality.
+    """
+    if distance_ft > 23.75:
+        return "NBA Deep 3"
+    if distance_ft >= 15.0:
+        return "Mid-Range"
+    if distance_ft >= 4.0:
+        return "Paint"
     return "Restricted Area"
 
 def is_clutch_shot(quarter: str) -> bool:
+    """Flag if the shot was taken in the 4th Quarter or Overtime.
+
+    Arguments:
+        quarter: The period of the game.
+
+    Returns:
+        True if the shot is considered clutch, False otherwise.
+    """
     return quarter.upper() in ("4", "Q4", "OT", "4TH")
 
 def enrich_event_message(row: dict[str, Any]) -> dict[str, Any]:
+    """Add NBA derived analytics to the shot record.
+
+    Arguments:
+        row: A raw consumed Kafka message row.
+
+    Returns:
+        The enriched row with additional analytics fields.
+    """
     shot_type = str(row.get("shot_type", ""))
     is_made = str(row.get("is_made", "False")).lower() in ("true", "1", "yes", "t")
     distance_ft = float(row.get("distance_ft", 0.0))
@@ -299,7 +338,7 @@ def process_message(
 
     # Filter for shot events only
     action_type = str(row.get("action_type", ""))
-    
+
     if action_type not in {"Made Shot", "Missed Shot", "Free Throw"}:
         LOG.info(f"Skipping non-shot event: play_id={row.get('play_id')}, action_type={action_type}")
         # Return None to have this non-shot event be counted as "skipped"

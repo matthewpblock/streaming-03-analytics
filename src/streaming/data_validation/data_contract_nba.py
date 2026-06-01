@@ -22,13 +22,13 @@ from typing import Any, Final
 
 from datafun_streaming.core.types import DataRecordDict
 from datafun_streaming.data_validation.types import ValidationResult
-from streaming.data_validation.data_validation_nba import validate_distance
 from datafun_streaming.data_validation.validation_utils import (
     validate_boolean_text,
     validate_datetime,
-    validate_positive_integer,
     validate_required_fields,
 )
+
+from streaming.data_validation.data_validation_nba import validate_distance
 
 # === DECLARE REQUIRED FIELDS ===
 

@@ -1,14 +1,15 @@
-"""src/streaming/fetch_nba_data.py
+"""src/streaming/fetch_nba_data.py.
 
-A utility script to fetch live/historical NBA play-by-play data 
+A utility script to fetch live/historical NBA play-by-play data
 and transform it into the streaming data contract format for Phase 5.
 """
 
-import pandas as pd
-import re
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
+import re
+
 from nba_api.stats.endpoints import playbyplayv3
+import pandas as pd
 
 # === PATH SETUP ===
 ROOT_DIR = Path.cwd()
@@ -17,8 +18,13 @@ EVENTS_CSV = DATA_DIR / "events.csv"
 PLAYERS_CSV = DATA_DIR / "players.csv"
 
 def fetch_game_data(game_id: str):
+    """Fetch play-by-play data for a given NBA game ID.
+
+    Arguments:
+        game_id: The NBA game ID to fetch.
+    """
     print(f"Fetching Play-by-Play data for Game ID: {game_id}...")
-    
+
     # Call the nba_api endpoint
     pbp = playbyplayv3.PlayByPlayV3(game_id=game_id)
     df = pbp.get_data_frames()[0]
@@ -30,17 +36,17 @@ def fetch_game_data(game_id: str):
     all_events = df
 
     # Simulated timestamp starting from current time to mimic a live stream
-    base_time = datetime.now(timezone.utc)
+    base_time = datetime.now(UTC)
 
     for idx, row in all_events.iterrows():
         # Skip events with no assigned player (e.g., technical team fouls)
         if pd.isna(row.get('personId')) or row.get('personId') == 0:
             continue
-            
+
         play_id = f"P{row['actionNumber']:04d}"
         pid = f"PL_{row['personId']}"
         player_name = row.get('playerName')
-        
+
         team_city = row.get('teamCity', '')
         team_tricode = row.get('teamTricode', '')
         team_name = f"{team_city} {team_tricode}".strip()
@@ -81,7 +87,7 @@ def fetch_game_data(game_id: str):
                 distance_ft = 15.0
             else:
                 # Defaults to 2.0 ft for layups/dunks if distance isn't logged
-                distance_ft = 2.0 
+                distance_ft = 2.0
         else:
             distance_ft = float(distance_ft)
 

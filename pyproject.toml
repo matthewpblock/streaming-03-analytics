@@ -23,8 +23,14 @@ dependencies = [
     "datafun-streaming", # WHY: Custom library with shared streaming code and types.
     "duckdb", # WHY: In-memory database for testing and prototyping.
     "matplotlib", # WHY: Static plotting library for quick visualizations.
+    "nba_api", # WHY: Fetch live NBA play-by-play data.
+    "pandas", # WHY: Data manipulation and export to CSV.
     "python-dotenv", # WHY: Load environment variables from .env files for configuration.
 ]
+
+[project.urls]
+Repository = "https://github.com/matthewpblock/streaming-03-analytics"
+Issues = "https://github.com/matthewpblock/streaming-03-analytics/issues"
 
 [project.optional-dependencies]
 # WHY: Optional dependency groups keep the core install clean and focused.
