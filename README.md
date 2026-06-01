@@ -5,7 +5,7 @@
 [![Python 3.14](https://img.shields.io/badge/python-3.14%2B-blue?logo=python)](./pyproject.toml)
 [![MIT](https://img.shields.io/badge/license-see%20LICENSE-yellow.svg)](./LICENSE)
 
-> Streaming data analytics: validate and summarize messages.
+> Real-time NBA Play-by-Play analytics: fetch, validate, filter, and summarize streaming game events.
 
 Streaming analytics requires working with data in motion
 and distributed, scalable systems.
