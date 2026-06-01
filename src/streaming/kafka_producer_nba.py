@@ -74,8 +74,6 @@ log_env_vars(LOG)
 # get from .env as strings with defaults
 msg_count = os.getenv("PRODUCER_MESSAGE_COUNT", "6")
 msg_interval_seconds = os.getenv("PRODUCER_MESSAGE_INTERVAL_SECONDS", "2.0")
-msg_count = os.getenv("PRODUCER_MESSAGE_COUNT", "1000")
-msg_interval_seconds = os.getenv("PRODUCER_MESSAGE_INTERVAL_SECONDS", "0.1")
 
 # then convert to correct types for CONSTANTS
 MESSAGE_COUNT: Final[int] = int(msg_count)
