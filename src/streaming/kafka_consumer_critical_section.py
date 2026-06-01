@@ -219,7 +219,7 @@ def initialize_output() -> RunningStats:
     return RunningStats()
 
 
-def load_reference_data() -> tuple[dict[str, float], dict[str, str], dict[str, str]]:
+def load_reference_data() -> tuple[dict[str, float], dict[str, str], dict[str, str], dict[str, float], dict[str, float]]:
     """Load reference data used for message enrichment.
 
     Returns:
@@ -227,6 +227,8 @@ def load_reference_data() -> tuple[dict[str, float], dict[str, str], dict[str, s
         - A dictionary mapping region_id to tax rate as a float.
         - A dictionary mapping product_id to product_name as a string.
         - A dictionary mapping currency_code to currency_name as a string.
+        - A dictionary mapping currency_code to exchange_rate_to_usd as a float.
+        - A dictionary mapping discount_code to discount_pct as a float.
     """
     LOG.info("Loading enrichment reference data...")
     region_lookup: dict[str, float] = {
@@ -259,7 +261,27 @@ def load_reference_data() -> tuple[dict[str, float], dict[str, str], dict[str, s
     }
     LOG.info(f"Found {len(currency_lookup)} currencies.")
     
-    return region_lookup, product_lookup, currency_lookup
+    exchange_rate_lookup: dict[str, float] = {
+        currency_code: float(exchange_rate)
+        for currency_code, exchange_rate in read_csv_as_lookup(
+            CURRENCIES_CSV,
+            key_field="currency_code",
+            value_field="exchange_rate_to_usd",
+        ).items()
+    }
+    LOG.info(f"Found {len(exchange_rate_lookup)} exchange rates.")
+
+    discount_lookup: dict[str, float] = {
+        discount_code: float(discount_pct)
+        for discount_code, discount_pct in read_csv_as_lookup(
+            DISCOUNT_CODES_CSV,
+            key_field="discount_code",
+            value_field="discount_pct",
+        ).items()
+    }
+    LOG.info(f"Found {len(discount_lookup)} discount codes.")
+
+    return region_lookup, product_lookup, currency_lookup, exchange_rate_lookup, discount_lookup
 
 
 def process_message(
@@ -268,6 +290,8 @@ def process_message(
     region_lookup: dict[str, float],
     product_lookup: dict[str, str],
     currency_lookup: dict[str, str],
+    exchange_rate_lookup: dict[str, float],
+    discount_lookup: dict[str, float],
     stats: RunningStats,
 ) -> dict[str, Any] | None:
     """Process one consumed message.
@@ -285,6 +309,8 @@ def process_message(
         region_lookup: Tax rates by region_id.
         product_lookup: Product names by product_id.
         currency_lookup: Currency names by currency_code.
+        exchange_rate_lookup: Exchange rates by currency_code.
+        discount_lookup: Discount percentages by discount_code.
         stats: Running statistics accumulator.
 
     Returns:
@@ -299,7 +325,12 @@ def process_message(
         return None
 
     # Then, enrich the message with derived fields.
-    enriched = enrich_message(row, region_lookup)
+    enriched = enrich_message(
+        row,
+        region_lookup=region_lookup,
+        discount_lookup=discount_lookup,
+        exchange_rate_lookup=exchange_rate_lookup,
+    )
 
     # Apply additional enrichment: Add product name and currency name
     product_id = enriched.get("product_id", "")
@@ -309,8 +340,10 @@ def process_message(
     enriched["currency_name"] = currency_lookup.get(currency_code, "Unknown Currency")
 
     LOG.info(f"subtotal={enriched['subtotal']}")
+    LOG.info(f"discount={enriched['discount_amount']}")
     LOG.info(f"tax={enriched['tax_amount']}")
     LOG.info(f"total={enriched['total']}")
+    LOG.info(f"total_usd={enriched['total_usd']}")
     LOG.info(f"running_total={stats.total + enriched['total']:.2f}")
 
     # Update running statistics with the new total.
@@ -324,6 +357,8 @@ def consume_messages(
     region_lookup: dict[str, float],
     product_lookup: dict[str, str],
     currency_lookup: dict[str, str],
+    exchange_rate_lookup: dict[str, float],
+    discount_lookup: dict[str, float],
     stats: RunningStats,
 ) -> tuple[int, int]:
     """Consume and process messages from the Kafka topic.
@@ -338,6 +373,8 @@ def consume_messages(
         region_lookup: Tax rates by region_id.
         product_lookup: Product names by product_id.
         currency_lookup: Currency names by currency_code.
+        exchange_rate_lookup: Exchange rates by currency_code.
+        discount_lookup: Discount percentages by discount_code.
         stats: Running statistics accumulator.
 
     Returns:
@@ -368,6 +405,8 @@ def consume_messages(
             region_lookup=region_lookup,
             product_lookup=product_lookup,
             currency_lookup=currency_lookup,
+            exchange_rate_lookup=exchange_rate_lookup,
+            discount_lookup=discount_lookup,
             stats=stats,
         )
 
@@ -455,7 +494,7 @@ def main() -> None:
     LOG.info("========================")
 
     stats = initialize_output()
-    region_lookup, product_lookup, currency_lookup = load_reference_data()
+    region_lookup, product_lookup, currency_lookup, exchange_rate_lookup, discount_lookup = load_reference_data()
 
     consumed_count = 0
     skipped_count = 0
@@ -466,6 +505,8 @@ def main() -> None:
             region_lookup=region_lookup,
             product_lookup=product_lookup,
             currency_lookup=currency_lookup,
+            exchange_rate_lookup=exchange_rate_lookup,
+            discount_lookup=discount_lookup,
             stats=stats,
         )
     finally:

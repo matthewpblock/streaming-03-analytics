@@ -38,6 +38,8 @@ __all__ = [
     "TAX_RATE_DEFAULT",
     "compute_tax_amount",
     "compute_total_price",
+    "compute_discount_amount",
+    "compute_total_usd",
     "enrich_message",
     "get_tax_rate",
 ]
@@ -67,6 +69,24 @@ def compute_total_price(quantity: int, unit_price: float) -> float:
     return round(quantity * unit_price, 2)
 
 
+def compute_discount_amount(total_price: float, discount_pct: float) -> float:
+    """Compute the discount amount based on a percentage.
+
+    Arguments:
+        total_price: Total price before discount.
+        discount_pct: Discount percentage as a decimal (e.g., 0.10 for 10%).
+
+    Returns:
+        Discount amount rounded to 2 decimal places.
+    """
+    return round(total_price * discount_pct, 2)
+
+
+def compute_total_usd(total: float, exchange_rate: float) -> float:
+    """Compute the final total standardized to USD."""
+    return round(total * exchange_rate, 2)
+
+
 def compute_tax_amount(total_price: float, tax_rate: float) -> float:
     """Compute the tax amount for an order.
 
@@ -83,6 +103,8 @@ def compute_tax_amount(total_price: float, tax_rate: float) -> float:
 def enrich_message(
     row: dict[str, Any],
     region_lookup: dict[str, float],
+    discount_lookup: dict[str, float] | None = None,
+    exchange_rate_lookup: dict[str, float] | None = None,
 ) -> dict[str, Any]:
     """Add all derived fields to a raw message row.
 
@@ -99,20 +121,35 @@ def enrich_message(
     Returns:
         A new dict containing all original fields plus derived fields.
     """
+    discount_lookup = discount_lookup or {}
+    exchange_rate_lookup = exchange_rate_lookup or {}
+
     quantity = int(row.get("quantity", 0))
     unit_price = float(row.get("unit_price", 0.0))
     region_id = str(row.get("region_id", ""))
+    discount_code = str(row.get("discount_code", ""))
+    currency_code = str(row.get("currency_code", "USD"))
 
     tax_rate = get_tax_rate(region_id, region_lookup)
     total_price = compute_total_price(quantity, unit_price)
-    tax_amount = compute_tax_amount(total_price, tax_rate)
 
-    total = round(total_price + tax_amount, 2)
+    discount_pct = discount_lookup.get(discount_code, 0.0) / 100.0
+    discount_amount = compute_discount_amount(total_price, discount_pct)
+
+    taxable_amount = total_price - discount_amount
+    tax_amount = compute_tax_amount(taxable_amount, tax_rate)
+
+    total = round(taxable_amount + tax_amount, 2)
+    exchange_rate = exchange_rate_lookup.get(currency_code, 1.0)
+    total_usd = compute_total_usd(total, exchange_rate)
+
     return {
         **row,
         "subtotal": total_price,
+        "discount_amount": discount_amount,
         "tax_amount": tax_amount,
         "total": total,
+        "total_usd": total_usd,
     }
 
 
