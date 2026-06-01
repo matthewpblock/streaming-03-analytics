@@ -1,4 +1,4 @@
-"""src/streaming/data_validation/data_validation_case.py.
+"""src/streaming/data_validation/data_validation_nba.py.
 
 Project-specific validation extensions.
 

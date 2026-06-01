@@ -1,10 +1,10 @@
-"""src/streaming/kafka_consumer_critical_section.py.
+"""src/streaming/kafka_consumer_nba.py.
 
 Kafka consumer: analytics
 
-Reads sales messages from a Kafka topic and runs the full pipeline:
+Reads shot messages from a Kafka topic and runs the full pipeline:
   - Validates each message against the data contract
-  - Computes derived fields (subtotal, tax amount, total)
+  - Computes derived fields (points_scored, shot_quality, clutch_shot)
 
 Start with main() at the bottom.
 Work up to see how it all fits together.
@@ -17,7 +17,7 @@ Date: 2026-05
 
 Terminal command to run this file from the root project folder:
 
-    uv run python -m streaming.kafka_consumer_critical_section
+    uv run python -m streaming.kafka_consumer_nba
 
 OBS:
   Don't edit this file - it should remain a working example.
@@ -282,11 +282,8 @@ def process_message(
 
     Arguments:
         row: A raw consumed Kafka message row.
-        region_lookup: Tax rates by region_id.
-        product_lookup: Product names by product_id.
-        currency_lookup: Currency names by currency_code.
-        exchange_rate_lookup: Exchange rates by currency_code.
-        discount_lookup: Discount percentages by discount_code.
+        player_name_lookup: Lookup dict.
+        team_name_lookup: Lookup dict.
         stats: Running statistics accumulator.
 
     Returns:
@@ -294,47 +291,33 @@ def process_message(
     """
     # First, validate the message against the data contract.
     # If validation fails, return None to indicate the message should be rejected.
-    errors = validate_required_fields(record=row, required_fields=SALES_REQUIRED_FIELDS)
+    errors = validate_required_fields(record=row, required_fields=SHOTS_REQUIRED_FIELDS)
     if errors:
-        LOG.warning(f"Validation failed for order {row.get('order_id', '?')}")
+        LOG.warning(f"Validation failed for play {row.get('play_id', '?')}")
         LOG.warning(f"errors={errors}")
         return None
 
     # Then, enrich the message with derived fields.
-    enriched = enrich_message(
-        row,
-        region_lookup=region_lookup,
-        discount_lookup=discount_lookup,
-        exchange_rate_lookup=exchange_rate_lookup,
-    )
+    enriched = enrich_shot_message(row)
+    pid = enriched.get("player_id", "")
+    enriched["player_name"] = player_name_lookup.get(pid, "Unknown Player")
+    enriched["team_name"] = team_name_lookup.get(pid, "Unknown Team")
 
-    # Apply additional enrichment: Add product name and currency name
-    product_id = enriched.get("product_id", "")
-    enriched["product_name"] = product_lookup.get(product_id, "Unknown Product")
-
-    currency_code = enriched.get("currency_code", "")
-    enriched["currency_name"] = currency_lookup.get(currency_code, "Unknown Currency")
-
-    LOG.info(f"subtotal={enriched['subtotal']}")
-    LOG.info(f"discount={enriched['discount_amount']}")
-    LOG.info(f"tax={enriched['tax_amount']}")
-    LOG.info(f"total={enriched['total']}")
-    LOG.info(f"total_usd={enriched['total_usd']}")
-    LOG.info(f"running_total={stats.total + enriched['total']:.2f}")
+    LOG.info(f"shot_quality={enriched['shot_quality_category']}")
+    LOG.info(f"clutch_shot={enriched['clutch_shot_flag']}")
+    LOG.info(f"points_scored={enriched['points_scored']}")
+    LOG.info(f"running_total_pts={stats.total + enriched['points_scored']:.0f}")
 
     # Update running statistics with the new total.
-    stats.update(enriched["total"])
+    stats.update(enriched["points_scored"])
     return enriched
 
 
 def consume_messages(
     consumer: Any,
     *,
-    region_lookup: dict[str, float],
-    product_lookup: dict[str, str],
-    currency_lookup: dict[str, str],
-    exchange_rate_lookup: dict[str, float],
-    discount_lookup: dict[str, float],
+    player_name_lookup: dict[str, str],
+    team_name_lookup: dict[str, str],
     stats: RunningStats,
 ) -> tuple[int, int]:
     """Consume and process messages from the Kafka topic.

@@ -1,4 +1,4 @@
-"""src/streaming/data_validation/data_contract_case.py.
+"""src/streaming/data_validation/data_contract_nba.py.
 
 Defines what a valid message looks like for this project:
 required fields, allowed values, reference table fields,
@@ -22,6 +22,7 @@ from typing import Any, Final
 
 from datafun_streaming.core.types import DataRecordDict
 from datafun_streaming.data_validation.types import ValidationResult
+from streaming.data_validation.data_validation_nba import validate_distance
 from datafun_streaming.data_validation.validation_utils import (
     validate_boolean_text,
     validate_datetime,
@@ -42,109 +43,56 @@ from datafun_streaming.data_validation.validation_utils import (
 
 # === EVENT TABLE FIELDS ===
 
-SALES_REQUIRED_FIELDS: Final[list[str]] = [
-    "order_id",
-    "datetime",
-    "region_id",
-    "currency_code",
-    "product_id",
-    "unit_price",
-    "quantity",
-    "is_online",
-    "customer_id",
-    "payment_method",
+SHOTS_REQUIRED_FIELDS: Final[list[str]] = [
+    "play_id",
+    "game_id",
+    "timestamp",
+    "player_id",
+    "shot_type",
+    "distance_ft",
+    "is_made",
 ]
 
-SALES_OPTIONAL_FIELDS: Final[list[str]] = [
-    "is_new_customer",
-    "device_type",
-    "referral_source",
-    "discount_code",
-    "customer_note",
+SHOTS_OPTIONAL_FIELDS: Final[list[str]] = [
+    "quarter",
+    "time_remaining",
 ]
 
-# Build the full list of valid fieldnames for sales messages
-# by using the asterisk or "splat" operator or "unpacking" operator
-# to expand the required and optional fields
-# so they can be combined in one list.
-VALID_SALES_FIELDNAMES: Final[list[str]] = [
-    *SALES_REQUIRED_FIELDS,
-    *SALES_OPTIONAL_FIELDS,
+VALID_SHOTS_FIELDNAMES: Final[list[str]] = [
+    *SHOTS_REQUIRED_FIELDS,
+    *SHOTS_OPTIONAL_FIELDS,
 ]
 
 
 # === REFERENCE TABLE FIELDS ===
 
-REGIONS_REQUIRED_FIELDS: Final[list[str]] = [
-    "region_id",
-    "region_name",
-    "country_code",
-    "country_name",
-    "currency_code",
-    "tax_rate_pct",
-    "timezone",
-]
-
-PRODUCTS_REQUIRED_FIELDS: Final[list[str]] = [
-    "product_id",
-    "product_name",
-    "category",
-    "level",
-    "price_usd",
-    "instructor",
-]
-
-CURRENCIES_REQUIRED_FIELDS: Final[list[str]] = [
-    "currency_code",
-    "currency_name",
-    "symbol",
-    "exchange_rate_to_usd",
-    "rate_date",
-]
-
-DISCOUNT_CODES_REQUIRED_FIELDS: Final[list[str]] = [
-    "discount_code",
-    "discount_pct",
-    "valid_from",
-    "valid_to",
-    "description",
+PLAYERS_REQUIRED_FIELDS: Final[list[str]] = [
+    "player_id",
+    "player_name",
+    "team_name",
+    "position",
 ]
 
 # === ALLOWED VALUES ===
 
-ALLOWED_DEVICE_TYPES: Final[set[str]] = {"mobile", "desktop", "tablet"}
-ALLOWED_PAYMENT_METHODS: Final[set[str]] = {
-    "credit_card",
-    "paypal",
-    "apple_pay",
-    "gift_card",
-}
-ALLOWED_REFERRAL_SOURCES: Final[set[str]] = {
-    "organic",
-    "paid_search",
-    "email",
-    "social",
-}
-ALLOWED_CURRENCY_CODES: Final[set[str]] = {"USD", "CAD", "MXN"}
+ALLOWED_SHOT_TYPES: Final[set[str]] = {"2PT", "3PT", "FT"}
 
 # === OUTPUT FIELD ORDER ===
 
 CONSUMED_FIELDNAMES: Final[list[str]] = [
-    *SALES_REQUIRED_FIELDS,
-    "product_name",
-    "currency_name",
-    "subtotal",
-    "discount_amount",
-    "tax_amount",
-    "total",
-    "total_usd",
+    *SHOTS_REQUIRED_FIELDS,
+    "player_name",
+    "team_name",
+    "points_scored",
+    "shot_quality_category",
+    "clutch_shot_flag",
     "_kafka_key",
     "_kafka_partition",
     "_kafka_offset",
 ]
 
-REJECTED_SALES_FIELDNAMES: Final[list[str]] = [
-    *SALES_REQUIRED_FIELDS,
+REJECTED_SHOTS_FIELDNAMES: Final[list[str]] = [
+    *SHOTS_REQUIRED_FIELDS,
     "validation_errors",
 ]
 
@@ -152,13 +100,12 @@ REJECTED_SALES_FIELDNAMES: Final[list[str]] = [
 # === DOMAIN-SPECIFIC VALIDATION ===
 
 
-def validate_sale_record(
+def validate_shot_record(
     *,
     record: DataRecordDict,
-    valid_region_ids: set[str],
-    valid_product_ids: set[str],
+    valid_player_ids: set[str],
 ) -> ValidationResult:
-    """Validate one sale record against this project's data contract.
+    """Validate one shot record against this project's data contract.
 
     This function can be enhanced.
 
@@ -166,8 +113,7 @@ def validate_sale_record(
 
     Arguments:
         record: The message to validate.
-        valid_region_ids: The set of valid region_id values from the regions reference table.
-        valid_product_ids: The set of valid product_id values from the products reference table.
+        valid_player_ids: The set of valid player_id values from the players reference table.
 
     Returns:
         A ValidationResult indicating whether the record is valid and any errors found.
@@ -178,11 +124,11 @@ def validate_sale_record(
     # Validate the required fields, get a list back,
     # and extend the errors list with any errors found.
     # This is a concise form of:
-    # required_field_errors = validate_required_fields(record=record, required_fields=SALES_REQUIRED_FIELDS)
+    # required_field_errors = validate_required_fields(record=record, required_fields=SHOTS_REQUIRED_FIELDS)
     # errors.extend(required_field_errors)
     # Use whichever you prefer.
     errors.extend(
-        validate_required_fields(record=record, required_fields=SALES_REQUIRED_FIELDS)
+        validate_required_fields(record=record, required_fields=SHOTS_REQUIRED_FIELDS)
     )
 
     if errors:
@@ -203,39 +149,15 @@ def validate_sale_record(
 
     # If the id value in the record is not in the set of valid ids,
     # add an error message to the errors list that includes the invalid value.
-    if record["region_id"] not in valid_region_ids:
-        errors.append(f"Unknown region_id: {record['region_id']!r}")
+    if record["player_id"] not in valid_player_ids:
+        errors.append(f"Unknown player_id: {record['player_id']!r}")
 
-    if record["product_id"] not in valid_product_ids:
-        errors.append(f"Unknown product_id: {record['product_id']!r}")
+    if record["shot_type"] not in ALLOWED_SHOT_TYPES:
+        errors.append(f"Invalid shot_type: {record['shot_type']!r}")
 
-    # Check more fields against allowed values and add errors as needed.
-
-    if record["device_type"] not in ALLOWED_DEVICE_TYPES:
-        errors.append(f"Invalid device_type: {record['device_type']!r}")
-
-    if record["payment_method"] not in ALLOWED_PAYMENT_METHODS:
-        errors.append(f"Invalid payment_method: {record['payment_method']!r}")
-
-    if record["referral_source"] not in ALLOWED_REFERRAL_SOURCES:
-        errors.append(f"Invalid referral_source: {record['referral_source']!r}")
-
-    if record["currency_code"] not in ALLOWED_CURRENCY_CODES:
-        errors.append(f"Invalid currency_code: {record['currency_code']!r}")
-
-    # Use append() to add one error message.
-    # Use extend() to add several error messages from a list.
-    # Our validation functions return a list of error messages.
-
-    errors.extend(validate_datetime(record["datetime"]))
-
-    errors.extend(validate_positive_integer(record["quantity"]))
-
-    errors.extend(validate_boolean_text(record["is_online"], field_name="is_online"))
-
-    errors.extend(
-        validate_boolean_text(record["is_new_customer"], field_name="is_new_customer")
-    )
+    errors.extend(validate_datetime(record["timestamp"]))
+    errors.extend(validate_boolean_text(record["is_made"], field_name="is_made"))
+    errors.extend(validate_distance(str(record.get("distance_ft", ""))))
 
     # After all checks, if the errors list is empty, the record is valid.
     # If there are any errors, the record is invalid.
@@ -254,8 +176,8 @@ def validate_sale_record(
 # === OUTPUT HELPERS ===
 
 
-def keep_sales_fields(row: dict[str, Any]) -> dict[str, Any]:
-    """Return only required sales fields in standard order.
+def keep_shots_fields(row: dict[str, Any]) -> dict[str, Any]:
+    """Return only required shot fields in standard order.
 
     This is used to create the output message for both valid and rejected records.
 

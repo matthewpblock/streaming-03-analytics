@@ -1,6 +1,6 @@
-"""src/streaming/kafka_producer_critical_section.py - Kafka producer.
+"""src/streaming/kafka_producer_nba.py - Kafka producer.
 
-Reads sales from data/sales.csv,
+Reads shots from data/shots.csv,
 validates them against the data contract,
 writes rejected records to a local CSV file,
 and sends valid records to a Kafka topic one message at a time.
@@ -16,7 +16,7 @@ Date: 2026-05
 
 Terminal command to run this file from the root project folder:
 
-    uv run python -m streaming.kafka_producer_critical_section
+    uv run python -m streaming.kafka_producer_nba
 
 OBS:
   Don't edit this file - it should remain a working example.
@@ -54,7 +54,7 @@ from streaming.data_validation.data_contract_nba import (
     REJECTED_SHOTS_FIELDNAMES,
     validate_shot_record,
 )
-from streaming.data_validation.data_validation_critical_nba import (
+from streaming.data_validation.data_validation_nba import (
     add_validation_errors,
     make_lookup_set,
     validate_reference_records,
@@ -161,41 +161,13 @@ def load_reference_data() -> set[str]:
     # Use the read_csv_rows function()
     # to read from reference tables in data/
 
-    # -----------------------------------------------------
-    # === LOAD REGION VALIDATION DATA (see regions.csv) ===
-    # -----------------------------------------------------
-
-    # For example, get a list of region records.
-    # Each one is a dictionary of fieldname to value,
-    # like {"region_id": "US-MO", "region_name": "Missouri"}.
-    region_records: list[dict[str, str]] = read_csv_rows(REGIONS_CSV)
-
-    # validate the region records against the data contract rules for regions.csv
-    # get back an empty list if all records are valid,
-    # or a list of error messages if any problems
-    region_error_list = validate_reference_records(
-        records=region_records,
-        required_fields=REGIONS_REQUIRED_FIELDS,
-        label="regions.csv",
+    player_records: list[dict[str, str]] = read_csv_rows(PLAYERS_CSV)
+    player_error_list = validate_reference_records(
+        records=player_records,
+        required_fields=PLAYERS_REQUIRED_FIELDS,
+        label="players.csv",
     )
-
-    # Extend the main errors list with any errors found in the region records.
-    errors.extend(region_error_list)
-
-    # -----------------------------------------------------
-    # === LOAD PRODUCT VALIDATION DATA (see products.csv) ===
-    # -----------------------------------------------------
-
-    # Get a list of product records.
-    # Each one is a dictionary of fieldname to value,
-    # like {"product_id": "P001", "product_name": "Product 1"}.
-    product_records: list[dict[str, str]] = read_csv_rows(PRODUCTS_CSV)
-    product_record_error_list = validate_reference_records(
-        records=product_records,
-        required_fields=PRODUCTS_REQUIRED_FIELDS,
-        label="products.csv",
-    )
-    errors.extend(product_record_error_list)
+    errors.extend(player_error_list)
 
     # -----------------------------------------------------
     # What other reference tables are available?
@@ -212,18 +184,10 @@ def load_reference_data() -> set[str]:
         LOG.error("Reference data failed validation. Fix reference files first.")
         raise SystemExit(1)
 
-    # -----------------------------------------------------
-    # MAKE LOOKUP SETS OF VALID IDS FOR LATER VALIDATION OF SALES MESSAGES
-    # -----------------------------------------------------
+    valid_player_ids = make_lookup_set(player_records, "player_id")
+    LOG.info(f"Found {len(valid_player_ids)} valid players.")
 
-    valid_region_ids = make_lookup_set(region_records, "region_id")
-    LOG.info(f"Found {len(valid_region_ids)} valid regions, ")
-
-    valid_product_ids = make_lookup_set(product_records, "product_id")
-    LOG.info(f"{len(valid_product_ids)} valid products.")
-
-    # return the results as a tuple of two sets
-    return valid_region_ids, valid_product_ids
+    return valid_player_ids
 
 
 # ===========================================================================
@@ -250,20 +214,20 @@ def get_message_key(message: dict[str, Any]) -> str:
 
 
 def generate_messages(count: int) -> Generator[dict[str, str]]:
-    """Generate a stream of sales from the input CSV file.
+    """Generate a stream of shots from the input CSV file.
 
     A generator function uses yield instead of return.
     It produces one value at a time instead of computing everything at once.
     This is how we model data in motion, one event arriving at a time.
 
     Arguments:
-        count: How many sales to generate.
+        count: How many shots to generate.
 
     Yields:
-        One sale row dictionary at a time.
+        One shot row dictionary at a time.
     """
-    sales_rows = read_csv_rows(SALES_CSV)
-    yield from sales_rows[:count]
+    shot_rows = read_csv_rows(SHOTS_CSV)
+    yield from shot_rows[:count]
 
 
 def write_rejected_record(record: DataRecordDict, errors: list[str]) -> None:
@@ -293,8 +257,8 @@ def initialize_output() -> None:
 
     # if the rejected CSV already exists from a prior run,
     # delete it and start fresh.
-    if REJECTED_SALES_CSV.exists():
-        REJECTED_SALES_CSV.unlink()
+    if REJECTED_SHOTS_CSV.exists():
+        REJECTED_SHOTS_CSV.unlink()
 
     LOG.info(f"Output directory ready: {OUTPUT_DIR.name}")
 
@@ -302,8 +266,7 @@ def initialize_output() -> None:
 def send_messages(
     producer: Any,
     settings: KafkaSettings,
-    valid_region_ids: set[str],
-    valid_product_ids: set[str],
+    valid_player_ids: set[str],
 ) -> tuple[int, int]:
     """Generate, validate, and send messages to the Kafka topic.
 
@@ -322,7 +285,7 @@ def send_messages(
     """
     LOG.info("Sending messages...")
     LOG.info(f"Sending up to {MESSAGE_COUNT} message(s) to topic {settings.topic!r}.")
-    LOG.info("Watch each sale arrive. Press CTRL+C to stop early.\n")
+    LOG.info("Watch each shot arrive. Press CTRL+C to stop early.\n")
 
     # initialize counters for summary stats at the end
     sent_count = 0
